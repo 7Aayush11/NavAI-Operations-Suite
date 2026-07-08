@@ -1,0 +1,49 @@
+# Dependency directories
+node_modules/
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Environment files
+.env
+.env.*
+
+# Build and output folders
+dist/
+build/
+out/
+coverage/
+.cache/
+public/build/
+
+# System files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE/editor folders
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Java build artifacts
+*.class
+*.jar
+*.war
+*.ear
+target/
+
+venv/
