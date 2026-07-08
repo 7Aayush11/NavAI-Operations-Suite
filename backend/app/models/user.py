@@ -32,6 +32,7 @@ class Application(Base):
     __tablename__ = 'applications'
 
     id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(Integer, ForeignKey('customers.id', ondelete="CASCADE"), nullable=True)
     customer_name = Column(String, nullable=False)
     phone_number = Column(String, nullable=False)
     email = Column(String, nullable=True)
@@ -46,6 +47,11 @@ class Application(Base):
     assigned_officer = relationship("User", back_populates="assigned_applications")
     step_logs = relationship("JourneyStepLog", back_populates="application", cascade="all, delete-orphan")
     feedbacks = relationship("CustomerFeedback", back_populates="application", cascade="all, delete-orphan")
+    
+    # New normalized tracking relations
+    customer = relationship("Customer", back_populates="applications")
+    sessions = relationship("ApplicationSession", back_populates="application", cascade="all, delete-orphan")
+    journey_events = relationship("JourneyEvent", back_populates="application", cascade="all, delete-orphan")
 
 class JourneyStepLog(Base):
     __tablename__ = 'journey_step_logs'

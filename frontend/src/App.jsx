@@ -11,13 +11,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // New specialized page imports
 import UserDirectory from './pages/UserDirectory';
-import CustomerJourney from './pages/CustomerJourney';
+import JourneyDetails from './pages/JourneyDetails';
 import FunnelAnalytics from './pages/FunnelAnalytics';
 import AIInsights from './pages/AIInsights';
 import ReportsExport from './pages/ReportsExport';
 import ApplicationsManager from './pages/ApplicationsManager';
 import RecordEvents from './pages/RecordEvents';
 import Settings from './pages/Settings';
+
+// Simulator module page import
+import OnboardingSimulator from './pages/simulator/OnboardingSimulator';
 
 const AppContent = () => {
   const { user } = useAuth();
@@ -47,12 +50,13 @@ const AppContent = () => {
                       {/* Mount specialized views */}
                       <ProtectedRoute exact path="/users" component={UserDirectory} roles={['Super Admin']} />
                       <ProtectedRoute exact path="/settings" component={Settings} roles={['Super Admin']} />
-                      <ProtectedRoute exact path="/journey" component={CustomerJourney} roles={['Super Admin', 'Branch Manager', 'Analyst']} />
+                      <ProtectedRoute exact path="/journey" component={JourneyDetails} roles={['Super Admin', 'Branch Manager', 'Analyst']} />
                       <ProtectedRoute exact path="/funnel" component={FunnelAnalytics} roles={['Super Admin', 'Branch Manager', 'Analyst']} />
                       <ProtectedRoute exact path="/ai-insights" component={AIInsights} roles={['Super Admin', 'Branch Manager', 'Analyst']} />
                       <ProtectedRoute exact path="/reports" component={ReportsExport} roles={['Super Admin', 'Branch Manager', 'Analyst']} />
                       <ProtectedRoute exact path="/applications" component={ApplicationsManager} roles={['Super Admin', 'Operations Officer']} />
                       <ProtectedRoute exact path="/events" component={RecordEvents} roles={['Super Admin', 'Operations Officer']} />
+                      <ProtectedRoute exact path="/simulator" component={OnboardingSimulator} roles={['Super Admin', 'Branch Manager']} />
                       
                       <Route component={NotFound} />
                     </Switch>

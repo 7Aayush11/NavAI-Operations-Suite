@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers.auth import router as auth_router
 from app.routers.users import router as users_router
 from app.routers.journey import router as journey_router
+from app.journey.router import router as journey_tracking_router
+from app.simulator.router import router as simulator_router
 import logging
 
 app = FastAPI(title="NavAI Operations Suite API", version="1.0.0")
@@ -20,6 +22,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(journey_router)
+app.include_router(journey_tracking_router)
+app.include_router(simulator_router)
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO)
