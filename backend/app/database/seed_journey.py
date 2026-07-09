@@ -9,15 +9,19 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from sqlalchemy.orm import Session
 from app.database.session import engine, Base, SessionLocal
-from app.models.user import User, Role, Application
+from app.models.user import User, Role, Application, JourneyStepLog, CustomerFeedback
 from app.journey.models import Customer, ApplicationSession, JourneyEvent
 from app.auth.security import get_password_hash
 
-def seed_journey_db():
+def seed_journey_db(drop_tables=True):
     print("=== SEEDING JOURNEY TRACKING DATA ===")
-    print("Dropping existing tables and recreating them...")
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+    if drop_tables:
+        print("Dropping existing tables and recreating them...")
+        Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
+    else:
+        print("Ensuring tables are created...")
+        Base.metadata.create_all(bind=engine)
     
     db: Session = SessionLocal()
     
@@ -249,7 +253,7 @@ def seed_journey_db():
         # End application status
         if outcome == "COMPLETED":
             app.status = "COMPLETED"
-            app.current_step = "Approved"
+            app.current_step = "SIGNATURE"
             
             # Write final Approved log
             db.add(JourneyEvent(
@@ -273,7 +277,7 @@ def seed_journey_db():
             ))
         elif outcome == "FAILED_OTP":
             app.status = "ABANDONED"
-            app.current_step = "Abandoned"
+            app.current_step = "PERSONAL_INFO"
             app.abandoned_reason = "Failed OTP Verification"
             
             db.add(JourneyEvent(
@@ -298,7 +302,7 @@ def seed_journey_db():
             ))
         elif outcome == "FAILED_KYC":
             app.status = "REJECTED"
-            app.current_step = "Rejected"
+            app.current_step = "KYC_UPLOAD"
             app.abandoned_reason = "Identity match validation failure during Video KYC"
             
             db.add(JourneyEvent(
@@ -323,7 +327,7 @@ def seed_journey_db():
             ))
         else: # ABANDONED_MIDWAY
             app.status = "ABANDONED"
-            app.current_step = "Abandoned"
+            app.current_step = "KYC_UPLOAD" if len(active_steps) > 4 else "PERSONAL_INFO"
             app.abandoned_reason = "User session inactive limit reached"
             
             db.add(JourneyEvent(
@@ -345,6 +349,101 @@ def seed_journey_db():
                 latitude=session.latitude,
                 longitude=session.longitude,
                 failure_reason="Inactive timeout"
+            ))
+
+        # Seed corresponding JourneyStepLog records for Dashboard milestones
+        # 1. REGISTER is always completed
+        db.add(JourneyStepLog(
+            application_id=app.id,
+            step_name="REGISTER",
+            status="COMPLETED",
+            duration_seconds=random.uniform(15.0, 45.0),
+            timestamp=created_time
+        ))
+
+        # 2. PERSONAL_INFO
+        if outcome in ["COMPLETED", "FAILED_KYC"] or (outcome == "ABANDONED_MIDWAY" and len(active_steps) > 4):
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="PERSONAL_INFO",
+                status="COMPLETED",
+                duration_seconds=random.uniform(45.0, 180.0),
+                timestamp=created_time + timedelta(seconds=60)
+            ))
+        elif outcome == "FAILED_OTP":
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="PERSONAL_INFO",
+                status="FAILED",
+                duration_seconds=random.uniform(30.0, 60.0),
+                error_message="Invalid OTP digits entered multiple times",
+                timestamp=created_time + timedelta(seconds=60)
+            ))
+        else: # ABANDONED_MIDWAY and <= 4 steps
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="PERSONAL_INFO",
+                status="FAILED",
+                duration_seconds=random.uniform(30.0, 60.0),
+                error_message="User session inactive limit reached",
+                timestamp=created_time + timedelta(seconds=60)
+            ))
+
+        # 3. KYC_UPLOAD
+        if outcome == "COMPLETED":
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="KYC_UPLOAD",
+                status="COMPLETED",
+                duration_seconds=random.uniform(120.0, 450.0),
+                timestamp=created_time + timedelta(seconds=180)
+            ))
+        elif outcome == "FAILED_KYC":
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="KYC_UPLOAD",
+                status="FAILED",
+                duration_seconds=random.uniform(90.0, 240.0),
+                error_message="Liveness check: face match mismatch with Aadhaar photo",
+                timestamp=created_time + timedelta(seconds=180)
+            ))
+        elif outcome == "ABANDONED_MIDWAY" and len(active_steps) > 4:
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="KYC_UPLOAD",
+                status="FAILED",
+                duration_seconds=random.uniform(90.0, 240.0),
+                error_message="User session inactive limit reached",
+                timestamp=created_time + timedelta(seconds=180)
+            ))
+
+        # 4. SIGNATURE
+        if outcome == "COMPLETED":
+            db.add(JourneyStepLog(
+                application_id=app.id,
+                step_name="SIGNATURE",
+                status="COMPLETED",
+                duration_seconds=random.uniform(30.0, 120.0),
+                timestamp=created_time + timedelta(seconds=450)
+            ))
+
+        # Seed corresponding CustomerFeedback if abandoned or rejected
+        if outcome != "COMPLETED":
+            feedback_cat = "OTHER"
+            feedback_notes = "User session inactive limit reached"
+            if outcome == "FAILED_OTP":
+                feedback_cat = "UI_NAVIGATION"
+                feedback_notes = "Failed OTP Verification"
+            elif outcome == "FAILED_KYC":
+                feedback_cat = "KYC_ISSUE"
+                feedback_notes = "Identity match validation failure during Video KYC"
+
+            db.add(CustomerFeedback(
+                application_id=app.id,
+                abandoned_reason_category=feedback_cat,
+                notes=feedback_notes,
+                recorded_by=officer.id,
+                timestamp=last_step_time + timedelta(hours=random.randint(1, 12))
             ))
             
         db.commit()

@@ -122,7 +122,7 @@ class JourneyRepository:
                      time_spent_seconds: Optional[float] = None, device_type: str = "", browser: str = "", operating_system: str = "", 
                      ip_address: str = "", city: Optional[str] = None, state: Optional[str] = None, country: Optional[str] = None, 
                      latitude: Optional[float] = None, longitude: Optional[float] = None, failure_reason: Optional[str] = None, 
-                     metadata_str: Optional[str] = None) -> JourneyEvent:
+                     metadata_str: Optional[str] = None, timestamp: Optional[datetime] = None) -> JourneyEvent:
         
         event = JourneyEvent(
             application_id=application_id,
@@ -131,6 +131,7 @@ class JourneyRepository:
             step_name=step_name,
             step_order=step_order,
             status=status,
+            timestamp=timestamp or datetime.utcnow(),
             time_spent_seconds=time_spent_seconds,
             device_type=device_type,
             browser=browser,
