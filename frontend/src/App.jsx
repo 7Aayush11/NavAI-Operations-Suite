@@ -22,6 +22,11 @@ import Settings from './pages/Settings';
 // Simulator module page import
 import OnboardingSimulator from './pages/simulator/OnboardingSimulator';
 
+// Loan Recovery module imports
+import LoanRecoveryDashboard from './pages/LoanRecoveryDashboard';
+import LoanPrediction from './pages/LoanPrediction';
+import LoanRecoveryAnalytics from './pages/LoanRecoveryAnalytics';
+
 const AppContent = () => {
   const { user } = useAuth();
 
@@ -57,6 +62,11 @@ const AppContent = () => {
                       <ProtectedRoute exact path="/applications" component={ApplicationsManager} roles={['Super Admin', 'Operations Officer']} />
                       <ProtectedRoute exact path="/events" component={RecordEvents} roles={['Super Admin', 'Operations Officer']} />
                       <ProtectedRoute exact path="/simulator" component={OnboardingSimulator} roles={['Super Admin', 'Branch Manager']} />
+                      
+                      {/* Loan Recovery AI module routes */}
+                      <ProtectedRoute exact path="/recovery" component={LoanRecoveryDashboard} roles={['Super Admin', 'Branch Manager', 'Operations Officer', 'Analyst']} />
+                      <ProtectedRoute exact path="/recovery-predict" component={LoanPrediction} roles={['Super Admin', 'Branch Manager', 'Operations Officer']} />
+                      <ProtectedRoute exact path="/recovery-analytics" component={LoanRecoveryAnalytics} roles={['Super Admin', 'Branch Manager', 'Analyst']} />
                       
                       <Route component={NotFound} />
                     </Switch>

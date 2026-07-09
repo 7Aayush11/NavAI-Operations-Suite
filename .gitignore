@@ -47,8 +47,3 @@ __pycache__/
 target/
 
 venv/
-
-# Databases
-*.db
-*.sqlite3
-

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   LayoutDashboard, Users, ShieldAlert, Settings, 
   BarChart3, Compass, FileText, Map, UserCheck, 
-  ChevronRight, LogOut, Cpu, Activity
+  ChevronRight, LogOut, Cpu, Activity, DollarSign, LineChart
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -84,6 +84,19 @@ const Sidebar = () => {
       path: '/events',
       icon: Activity,
       roles: ['Super Admin', 'Operations Officer']
+    },
+    // Loan Recovery Module Views
+    {
+      title: 'Loan Recovery',
+      path: '/recovery',
+      icon: DollarSign,
+      roles: ['Super Admin', 'Branch Manager', 'Operations Officer', 'Analyst']
+    },
+    {
+      title: 'Recovery Analytics',
+      path: '/recovery-analytics',
+      icon: LineChart,
+      roles: ['Super Admin', 'Branch Manager', 'Analyst']
     }
   ];
 
