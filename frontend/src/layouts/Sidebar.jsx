@@ -66,6 +66,12 @@ const Sidebar = () => {
       icon: FileText,
       roles: ['Super Admin', 'Branch Manager', 'Analyst']
     },
+    {
+      title: 'Onboarding Simulator',
+      path: '/simulator',
+      icon: Cpu,
+      roles: ['Super Admin', 'Branch Manager']
+    },
     // Operations Officer Views
     {
       title: 'My Applications',
